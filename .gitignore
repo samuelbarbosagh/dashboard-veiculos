@@ -1,0 +1,12 @@
+# Ambientes e Segredos
+.env
+.env.local
+*.pem
+*.key
+*.json
+!data/vehicles.json
+
+# Logs e arquivos temporários
+*.log
+__pycache__/
+.DS_Store
