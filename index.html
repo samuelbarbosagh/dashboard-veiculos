@@ -2,23 +2,24 @@
 <html lang="pt-BR" data-theme="auto">
 <head>
   <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Dashboard de Consulta de Veículos & Frotas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Dashboard de Consulta de Veículos & Auditoria de Abastecimento</title>
   
   <!-- PWA & Mobile Meta Tags -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e3a8a">
+  <meta name="theme-color" content="#1a227d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <!-- Chart.js para os Gráficos Executivos da Aba DASHBOARD / INDICADORES -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <!-- Tesseract.js para OCR de placa no navegador -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
@@ -33,7 +34,7 @@
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
         <h2>Acesso ao Dashboard</h2>
-        <p>Informe seu usuário e senha para consultar a frota</p>
+        <p>Informe seu usuário e senha para consultar a frota e auditoria</p>
       </div>
 
       <form id="loginForm" class="login-form">
@@ -78,8 +79,8 @@
             <circle cx="18.5" cy="18.5" r="2.5"></circle>
           </svg>
           <div>
-            <h1>Consulta de Frotas</h1>
-            <span class="subtitle">Gestão Integrada de Veículos</span>
+            <h1>Gestão de Frotas & Abastecimento</h1>
+            <span class="subtitle">Consulta Técnica ST9 &bull; Auditoria Consolidada Fichas (_FC_) x App (_PA_)</span>
           </div>
         </div>
         <div class="header-right">
@@ -115,9 +116,35 @@
           </button>
         </div>
       </div>
+
+      <!-- Barra de Guias Principais do Sistema -->
+      <div class="main-nav-tabs-wrapper">
+        <div class="main-nav-tabs" id="mainViewTabs">
+          <button type="button" class="main-nav-tab active" id="btnGuiaConsulta" data-guia="consulta">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Consulta de Frota & Ficha Técnica</span>
+            <span class="tab-pill-badge" id="badgeTotalFrota">1.073</span>
+          </button>
+          <button type="button" class="main-nav-tab" id="btnGuiaDashboard" data-guia="dashboard">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <span>Dashboard Executivo & Indicadores (Auditoria)</span>
+            <span class="tab-pill-badge tab-pill-orange">Ficha x App</span>
+          </button>
+        </div>
+      </div>
     </header>
 
-    <main class="main-container">
+    <!-- ===================================================================
+         GUIA 1: CONSULTA DE FROTA & FICHA TÉCNICA (COM PARALELO FICHA X APP)
+         =================================================================== -->
+    <main class="main-container" id="guiaConsultaView">
       <!-- Search & Controls Section -->
       <section class="controls-card">
         <div class="search-box">
@@ -125,7 +152,7 @@
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="searchInput" placeholder="Buscar placa, chassi, série, modelo...">
+          <input type="text" id="searchInput" placeholder="Buscar placa, código do bem, chassi, série, modelo...">
           <button id="clearSearch" class="btn-clear" title="Limpar busca">&times;</button>
           <button id="btnOpenScan" class="btn-camera" title="Escanear placa pela câmera">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -152,11 +179,15 @@
           </div>
 
           <div class="filter-group">
-            <label for="statusFilter">Status:</label>
+            <label for="statusFilter">Status / Origem Abastecimento:</label>
             <select id="statusFilter">
-              <option value="">Todos</option>
+              <option value="">Todos os veículos</option>
+              <option value="paralelo">Em Paralelo: Ficha (_FC_) + Aplicativo (_PA_)</option>
+              <option value="abastecido">Com Abastecimento na Ficha (_FC_)</option>
+              <option value="abastecido_app">Com Abastecimento no Aplicativo (_PA_)</option>
+              <option value="so_ficha">Apenas na Ficha Manual (Ausente no App)</option>
+              <option value="so_app">Apenas no Aplicativo (Sem Ficha Manual)</option>
               <option value="alerta">Com Alerta (Horímetro parado)</option>
-              <option value="abastecido">Com Abastecimento Registrado</option>
               <option value="chassi">Com Chassi Cadastrado</option>
             </select>
           </div>
@@ -216,8 +247,339 @@
       </div>
     </main>
 
+    <!-- ===================================================================
+         GUIA 2: DASHBOARD EXECUTIVO & INDICADORES (AUDITORIA CONSOLIDADA)
+         Baseado nas abas INDICADORES e DASHBOARD da planilha Google Sheets
+         =================================================================== -->
+    <main class="main-container exec-dashboard-container" id="guiaDashboardView" style="display: none;">
+      <!-- Cabeçalho Executivo (Idêntico ao topo da aba DASHBOARD) -->
+      <section class="exec-hero-banner">
+        <div class="exec-hero-left">
+          <div class="exec-hero-badge">PAINEL AUDITÁVEL CONSOLIDADO &bull; GOOGLE SHEETS</div>
+          <h2>DASHBOARD EXECUTIVO - AUDITORIA, SAZONALIDADE E EFICIÊNCIA DE FROTA</h2>
+          <p id="execPeriodSubtitle">
+            Período Analisado: <strong>01/10/2026 a 04/11/2026</strong> &bull;
+            Comparativo em Paralelo: <strong>Fichas Manuais (_FC_)</strong> vs. <strong>Portal Almoxarifado / App (_PA_)</strong> vs. <strong>SCP</strong>
+          </p>
+        </div>
+
+        <div class="exec-hero-controls">
+          <div class="exec-filter-box">
+            <label for="execFilialFilter">Filtrar Unidade / Filial:</label>
+            <select id="execFilialFilter">
+              <option value="TODAS">TODAS AS FILIAIS (REDE CONSOLIDADA)</option>
+              <option value="0501">0501 - Aparecida de Goiânia (GO)</option>
+              <option value="0201">0201 - Uberaba (MG)</option>
+              <option value="0104">0104 - Londrina (PR)</option>
+              <option value="0103">0103 - Belo Horizonte (MG)</option>
+              <option value="0107">0107 - Unaí (MG)</option>
+              <option value="0102">0102 - Porto Velho (RO)</option>
+            </select>
+          </div>
+
+          <div class="exec-action-btns">
+            <button type="button" class="btn-exec-action" id="btnExportAuditCsv" title="Exportar tabelas consolidadas de auditoria em CSV">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Exportar CSV Auditável</span>
+            </button>
+            <button type="button" class="btn-exec-action" id="btnPrintDashboard" title="Imprimir ou Salvar Relatório Executivo em PDF">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+              </svg>
+              <span>Imprimir / PDF</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sub-navegação de Seções da Guia de Indicadores -->
+      <div class="exec-section-pills" id="execSectionPills">
+        <button type="button" class="exec-pill active" data-sec="all">Visão Completa Consolidada (Gráficos + Tabelas)</button>
+        <button type="button" class="exec-pill" data-sec="charts-gov">1. Governança & Paralelo Ficha x App</button>
+        <button type="button" class="exec-pill" data-sec="charts-comb">2. Matriz Energética & Sazonalidade</button>
+        <button type="button" class="exec-pill" data-sec="charts-rank">3. Top 10 Veículos, Divergências & C.C.</button>
+        <button type="button" class="exec-pill" data-sec="charts-frent">4. Ranking e Auditoria de Frentistas</button>
+        <button type="button" class="exec-pill" data-sec="tables-audit">5. Quadros Analíticos (Aba INDICADORES)</button>
+      </div>
+
+      <!-- Cards de KPIs Executivos Globais (Linha 4-5 da aba INDICADORES + Comparativo Paralelo) -->
+      <section class="exec-kpis-grid" id="execKpisGrid">
+        <!-- Populado dinamicamente via JS -->
+      </section>
+
+      <!-- Barra de Legenda Oficial de Cores (Padrão Google Sheets DASHBOARD) -->
+      <div class="exec-legend-bar">
+        <span class="legend-title">Padrão Visual Oficial (Aba DASHBOARD):</span>
+        <span class="legend-item"><i class="dot" style="background:#1a227d;"></i> Ficha Manual (<code>_FC_</code>)</span>
+        <span class="legend-item"><i class="dot" style="background:#e56619;"></i> Aplicativo / Portal Almoxarifado (<code>_PA_</code>)</span>
+        <span class="legend-item"><i class="dot" style="background:#2d8c56;"></i> Controle SCP / Consistência OK</span>
+        <span class="legend-item"><i class="dot" style="background:#f2a50c;"></i> Óleo Diesel</span>
+        <span class="legend-item"><i class="dot" style="background:#e05133;"></i> Gasolina</span>
+        <span class="legend-item"><i class="dot" style="background:#1e99e0;"></i> Arla 32</span>
+        <span class="legend-item"><i class="dot" style="background:#c02626;"></i> Divergência / Alerta / Desperdício</span>
+      </div>
+
+      <!-- =================================================================
+           BLOCO 1 DE GRÁFICOS: GOVERNANÇA, PARALELO FICHA (_FC_) X APP (_PA_)
+           ================================================================= -->
+      <section class="exec-block" data-block="charts-gov">
+        <div class="exec-block-header">
+          <div>
+            <h3>1. Governança e Conciliação em Paralelo: Fichas Manuais (_FC_) vs. Aplicativo Portal (_PA_)</h3>
+            <p>Comparativo direto de volume, quantidade de registros, aderência digital e status de auditoria por filial</p>
+          </div>
+          <span class="exec-block-tag">Gráficos 1 a 6 &bull; Aba DASHBOARD</span>
+        </div>
+
+        <div class="exec-charts-grid">
+          <div class="exec-chart-card exec-chart-wide">
+            <div class="chart-card-header">
+              <h4>Volume Abastecido por Filial: Fichas (_FC_) vs. Portal (_PA_) (Litros)</h4>
+              <span class="chart-tag">Colunas em Paralelo</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartVolFichaVsPortal"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Volume Abastecido (L) vs. Taxa de Adesão ao Portal (%)</h4>
+              <span class="chart-tag">Combo (Barras + Linha)</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartVolVsAdesao"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Comparativo de Registros: Fichas Manual vs. App Portal</h4>
+              <span class="chart-tag">Qtd. Lançamentos</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartQtdFichaVsPortal"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Auditoria de Conciliação: Status das Fichas vs. Portal</h4>
+              <span class="chart-tag">Barras Empilhadas</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartStatusConciliacao"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Evolução Mensal: Fichas (_FC_) vs. Portal (_PA_)</h4>
+              <span class="chart-tag">Out/2026 x Nov/2026</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartMensalFichaPortal"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card exec-chart-full">
+            <div class="chart-card-header">
+              <h4>Auditoria Comparativa Empilhada Lado a Lado: Fichas (_FC_) vs. Portal (_PA_) por Filial</h4>
+              <span class="chart-tag">Memória de Cálculo 3b &bull; Consistentes / Inconsistentes / Localizadas / Não Localizadas</span>
+            </div>
+            <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartAuditoriaEmpilhada"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           BLOCO 2 DE GRÁFICOS: MATRIZ ENERGÉTICA & SAZONALIDADE (3 FONTES)
+           ================================================================= -->
+      <section class="exec-block" data-block="charts-comb">
+        <div class="exec-block-header">
+          <div>
+            <h3>2. Matriz Energética (Diesel, Gasolina, Arla 32) e Sazonalidade Comparativa (Ficha x App x SCP)</h3>
+            <p>Evolução diária, semanal e mensal do consumo por matriz de combustível e confronto entre as 3 fontes</p>
+          </div>
+          <span class="exec-block-tag">Gráficos 7 a 14 &bull; Aba DASHBOARD</span>
+        </div>
+
+        <div class="exec-charts-grid">
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Matriz Energética: Consumo por Combustível e Filial (Litros)</h4>
+              <span class="chart-tag">Diesel / Gasolina / Arla 32</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartMatrizFilial"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Sazonalidade: Consumo por Dia da Semana (1=Dom a 7=Sáb)</h4>
+              <span class="chart-tag">Colunas Empilhadas</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartDiaSemanaComb"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Evolução Mensal Consolidada por Combustível (Mês/Ano)</h4>
+              <span class="chart-tag">10/2026 vs 11/2026</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartMensalComb"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card exec-chart-wide">
+            <div class="chart-card-header">
+              <h4>Evolução Diária do Consumo por Combustível (01/10 a 04/11 - Litros)</h4>
+              <span class="chart-tag">Série Temporal Diária</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartEvolucaoDiariaComb"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Sazonalidade Semanal - DIESEL (Ficha vs. Portal vs. SCP)</h4>
+              <span class="chart-tag">Comparativo 3 Fontes</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartSemanalDiesel3Fontes"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Sazonalidade Semanal - GASOLINA (Ficha vs. Portal vs. SCP)</h4>
+              <span class="chart-tag">Comparativo 3 Fontes</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartSemanalGasolina3Fontes"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card exec-chart-wide">
+            <div class="chart-card-header">
+              <h4>Evolução Diária - DIESEL: Ficha (_FC_) vs. Portal (_PA_) vs. SCP (Litros)</h4>
+              <span class="chart-tag">Auditoria Diária Diesel</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartDiarioDiesel3Fontes"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card exec-chart-wide">
+            <div class="chart-card-header">
+              <h4>Evolução Diária - GASOLINA: Ficha (_FC_) vs. Portal (_PA_) vs. SCP (Litros)</h4>
+              <span class="chart-tag">Auditoria Diária Gasolina</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartDiarioGasolina3Fontes"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           BLOCO 3 DE GRÁFICOS: TOP 10 VEÍCULOS, DIVERGÊNCIAS, MODALIDADE E C.C.
+           ================================================================= -->
+      <section class="exec-block" data-block="charts-rank">
+        <div class="exec-block-header">
+          <div>
+            <h3>3. Rankings de Consumo, Placas Divergentes, Modalidades e Centros de Custo</h3>
+            <p>Maiores consumidores da rede, ofensores de divergência Ficha vs. Portal, share Interno/Comboio e Centros de Custo</p>
+          </div>
+          <span class="exec-block-tag">Gráficos 15 a 22 &bull; Aba DASHBOARD</span>
+        </div>
+
+        <div class="exec-charts-grid">
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Top 10 Veículos Maiores Consumidores da Rede (Litros)</h4>
+              <span class="chart-tag">Consolidado 5 Filiais</span>
+            </div>
+            <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartTop10Consumidores"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Top 10 Placas com Divergência de Volume (Fichas vs. Portal)</h4>
+              <span class="chart-tag">Ficha (_FC_) x App (_PA_) x Diferença</span>
+            </div>
+            <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartTop10DivergenciaPlacas"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Top 10 Veículos Ofensores no Portal (Alertas / Divergências)</h4>
+              <span class="chart-tag">Qtd. Divergências & Volume</span>
+            </div>
+            <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartTop10OfensoresPortal"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Share de Volume por Modalidade (Interno vs. Comboio)</h4>
+              <span class="chart-tag">Distribuição (Litros)</span>
+            </div>
+            <div class="chart-canvas-wrap"><canvas id="chartModalidadeDonut"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Top 10 Operações / Equipamentos Consumidores (Litros)</h4>
+              <span class="chart-tag">Por Tipo de Equipamento</span>
+            </div>
+            <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartTop10Operacoes"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Top 10 Centros de Custo - Consumo DIESEL (Litros)</h4>
+              <span class="chart-tag">Quadro 17 &bull; Diesel</span>
+            </div>
+            <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartCCDiesel"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Top 10 Centros de Custo - Consumo GASOLINA (Litros)</h4>
+              <span class="chart-tag">Quadro 18 &bull; Gasolina</span>
+            </div>
+            <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartCCGasolina"></canvas></div>
+          </div>
+
+          <div class="exec-chart-card">
+            <div class="chart-card-header">
+              <h4>Top 10 Centros de Custo - Consumo ARLA 32 (Litros)</h4>
+              <span class="chart-tag">Quadro 19 &bull; Arla 32</span>
+            </div>
+            <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartCCArla"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           BLOCO 4 DE GRÁFICOS: RANKING E AUDITORIA DE FRENTISTAS
+           ================================================================= -->
+      <section class="exec-block" data-block="charts-frent">
+        <div class="exec-block-header">
+          <div>
+            <h3>4. Desempenho, Eficiência e Auditoria por Frentista (Fichas _FC_ vs. Portal _PA_)</h3>
+            <p>Volume abastecido por frentista nas Fichas Manuais vs. Aplicativo Portal, índice de adesão e divergências</p>
+          </div>
+          <span class="exec-block-tag">Gráfico 23 & Quadro 20 &bull; Aba INDICADORES</span>
+        </div>
+
+        <div class="exec-charts-grid">
+          <div class="exec-chart-card exec-chart-full">
+            <div class="chart-card-header">
+              <h4>Comparativo por Frentista: Litros Fichas (_FC_) vs. Litros Portal (_PA_) e Divergências</h4>
+              <span class="chart-tag">11 Frentistas Auditados</span>
+            </div>
+            <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartRankingFrentistas"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           BLOCO 5: TABELAS CONSOLIDADAS E AUDITÁVEIS (ABA INDICADORES)
+           Clique em qualquer placa para abrir a Ficha Técnica e Auditoria!
+           ================================================================= -->
+      <section class="exec-block" data-block="tables-audit" id="execAuditableTablesContainer">
+        <!-- Populado dinamicamente via JS com todos os quadros da aba INDICADORES -->
+      </section>
+    </main>
+
     <footer class="footer">
-      <p>Dashboard de Consulta de Frotas &copy; 2026 &bull; Sincronização automática com Google Sheets via GitHub Actions</p>
+      <p>Dashboard de Consulta de Frotas & Auditoria Consolidada &copy; 2026 &bull; Base integrada: ST9, TT8 Protheus, Fichas Manuais (<code>_FC_</code>), Portal Almoxarifado (<code>_PA_</code>) e Aba <code>INDICADORES</code></p>
     </footer>
   </div>
 
@@ -356,7 +718,6 @@
     </div>
   </div>
 
-  
   <script src="app.js"></script>
 </body>
 </html>

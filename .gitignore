@@ -5,6 +5,8 @@
 *.key
 *.json
 !data/vehicles.json
+!data/indicadores.json
+!manifest.json
 
 # Logs e arquivos temporários
 *.log
