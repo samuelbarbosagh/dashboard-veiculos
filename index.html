@@ -60,7 +60,7 @@
         </button>
 
         <div class="login-hint">
-          <span>Acesso: <code>samuel</code></span>
+          <span>Acesso padrão: <code>samuel</code> / <code>consulta</code> (ADM)</span>
         </div>
       </form>
     </div>
@@ -88,6 +88,23 @@
             <button id="btnThemeLight" class="btn-theme" title="Modo Claro">☀️</button>
             <button id="btnThemeDark" class="btn-theme" title="Modo Escuro">🌙</button>
           </div>
+          <div id="currentUserBadge" class="current-user-badge" style="display: none;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span id="navUsername">samuel</span>
+            <span id="navUserRole" class="role-pill role-pill-adm">ADM</span>
+          </div>
+          <button id="btnManageUsers" class="btn-manage-users" title="Gerenciar Usuários (Exclusivo Administrador)" style="display: none;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Usuários</span>
+          </button>
           <button id="btnLogout" class="btn-logout" title="Encerrar sessão">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -202,6 +219,95 @@
     <footer class="footer">
       <p>Dashboard de Consulta de Frotas &copy; 2026 &bull; Sincronização automática com Google Sheets via GitHub Actions</p>
     </footer>
+  </div>
+
+  <!-- Modal de Gerenciamento de Usuários (Exclusivo Administrador) -->
+  <div id="usersModal" class="users-modal" style="display: none;">
+    <div class="users-dialog">
+      <div class="users-header">
+        <div class="users-header-title">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <div>
+            <h3>Gerenciamento de Usuários & Perfis</h3>
+            <span class="users-subtitle">Somente Administrador pode cadastrar novos acessos</span>
+          </div>
+        </div>
+        <button id="btnCloseUsersModal" class="btn-close-modal" title="Fechar">&times;</button>
+      </div>
+
+      <div class="users-body">
+        <!-- Card de Criação de Usuário -->
+        <div class="user-create-card">
+          <h4>Novo Usuário</h4>
+          <form id="createUserForm" class="user-create-form">
+            <div class="user-form-grid">
+              <div class="form-group">
+                <label for="newUsername">Usuário / Login *</label>
+                <input type="text" id="newUsername" placeholder="Ex: operador1" required autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="newFullName">Nome / Descrição</label>
+                <input type="text" id="newFullName" placeholder="Ex: Operador Logístico" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="newPassword">Senha de Acesso *</label>
+                <input type="password" id="newPassword" placeholder="Mínimo 4 dígitos" required autocomplete="new-password">
+              </div>
+              <div class="form-group">
+                <label for="newRole">Perfil de Usuário *</label>
+                <select id="newRole" required>
+                  <option value="consulta">Consulta (Apenas leitura/busca)</option>
+                  <option value="adm">Administrador (Acesso total)</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="createUserFeedback" class="form-feedback" style="display: none;"></div>
+
+            <div class="user-form-actions">
+              <button type="submit" class="btn-create-user" id="btnSubmitCreateUser">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <line x1="19" y1="8" x2="19" y2="14"></line>
+                  <line x1="22" y1="11" x2="16" y2="11"></line>
+                </svg>
+                <span>Cadastrar Usuário</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Lista de Usuários Cadastrados -->
+        <div class="users-list-section">
+          <div class="users-list-header">
+            <h4>Usuários Cadastrados (<span id="usersTotalCount">0</span>)</h4>
+            <span class="users-list-hint">Usuários salvos no armazenamento seguro local</span>
+          </div>
+          <div class="users-table-container">
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th>Usuário</th>
+                  <th>Nome</th>
+                  <th>Perfil</th>
+                  <th>Criado em</th>
+                  <th style="text-align: right;">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <!-- Populado via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Modal do Scanner de Placa via Câmera (OCR) -->

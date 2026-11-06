@@ -1,9 +1,16 @@
-// Auth State & Hash-based credential check
-// Username: samuel | Password: consulta
-const AUTH_USER = 'samuel';
-const AUTH_HASH = 'a2e363fb1596b372d664fa81bf5fbbeb1aaab6e358df85c7973cc5ffbbe82248'; // sha256('consulta')
+// Gestão de Usuários, Perfis e Autenticação
+const USERS_STORAGE_KEY = 'frota_users_db';
 const SESSION_KEY = 'frota_dashboard_session';
 const THEME_KEY = 'frota_theme_pref';
+
+// Administrador padrão inicial do sistema (se a base local estiver vazia)
+const DEFAULT_ADMIN = {
+  username: 'samuel',
+  name: 'Samuel Barbosa',
+  role: 'adm', // 'adm' (administrador) ou 'consulta' (apenas visualização)
+  hash: 'a2e363fb1596b372d664fa81bf5fbbeb1aaab6e358df85c7973cc5ffbbe82248', // sha256('consulta')
+  createdAt: '06/11/2026'
+};
 
 // State
 let allVehicles = [];
@@ -11,7 +18,7 @@ let filteredVehicles = [];
 let selectedVehicle = null;
 let videoStream = null;
 
-// DOM Elements
+// DOM Elements - Auth & Header
 const loginOverlay = document.getElementById('loginOverlay');
 const loginForm = document.getElementById('loginForm');
 const usernameInput = document.getElementById('username');
@@ -20,6 +27,24 @@ const loginError = document.getElementById('loginError');
 const appContainer = document.getElementById('appContainer');
 const btnLogout = document.getElementById('btnLogout');
 
+const currentUserBadge = document.getElementById('currentUserBadge');
+const navUsername = document.getElementById('navUsername');
+const navUserRole = document.getElementById('navUserRole');
+const btnManageUsers = document.getElementById('btnManageUsers');
+
+// DOM Elements - Users Modal (ADM)
+const usersModal = document.getElementById('usersModal');
+const btnCloseUsersModal = document.getElementById('btnCloseUsersModal');
+const createUserForm = document.getElementById('createUserForm');
+const newUsernameInput = document.getElementById('newUsername');
+const newFullNameInput = document.getElementById('newFullName');
+const newPasswordInput = document.getElementById('newPassword');
+const newRoleSelect = document.getElementById('newRole');
+const createUserFeedback = document.getElementById('createUserFeedback');
+const usersTotalCount = document.getElementById('usersTotalCount');
+const usersTableBody = document.getElementById('usersTableBody');
+
+// DOM Elements - Main Filters & Vehicles
 const searchInput = document.getElementById('searchInput');
 const clearSearchBtn = document.getElementById('clearSearch');
 const btnOpenScan = document.getElementById('btnOpenScan');
@@ -88,9 +113,69 @@ async function sha256(str) {
     .join('');
 }
 
+// Users Database Helpers
+function getUsers() {
+  try {
+    const raw = localStorage.getItem(USERS_STORAGE_KEY);
+    if (!raw) {
+      const initialList = [DEFAULT_ADMIN];
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initialList));
+      return initialList;
+    }
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list) || list.length === 0) {
+      const initialList = [DEFAULT_ADMIN];
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initialList));
+      return initialList;
+    }
+    // Garante que o administrador mestre sempre existe
+    const hasSamuel = list.some(u => u.username === 'samuel');
+    if (!hasSamuel) {
+      list.unshift(DEFAULT_ADMIN);
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(list));
+    }
+    return list;
+  } catch (e) {
+    console.error('Erro ao ler base de usuários:', e);
+    return [DEFAULT_ADMIN];
+  }
+}
+
+function saveUsers(users) {
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+}
+
+function getCurrentSession() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    if (raw === 'true') {
+      return { username: 'samuel', name: 'Samuel Barbosa', role: 'adm' };
+    }
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.username) return parsed;
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setCurrentSession(userObj) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+    username: userObj.username,
+    name: userObj.name || userObj.username,
+    role: userObj.role || 'consulta'
+  }));
+}
+
+function clearCurrentSession() {
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+// Authentication Setup
 function setupAuth() {
-  const isAuth = sessionStorage.getItem(SESSION_KEY);
-  if (isAuth === 'true') {
+  const session = getCurrentSession();
+  if (session) {
     showDashboard();
   } else {
     showLogin();
@@ -100,14 +185,18 @@ function setupAuth() {
     e.preventDefault();
     loginError.style.display = 'none';
 
-    const user = usernameInput.value.trim().toLowerCase();
-    const pass = passwordInput.value;
-    const passHash = await sha256(pass);
+    const inputUser = usernameInput.value.trim().toLowerCase();
+    const inputPass = passwordInput.value;
+    const passHash = await sha256(inputPass);
 
-    if (user === AUTH_USER && passHash === AUTH_HASH) {
-      sessionStorage.setItem(SESSION_KEY, 'true');
+    const users = getUsers();
+    const matchedUser = users.find(u => u.username.toLowerCase() === inputUser && u.hash === passHash);
+
+    if (matchedUser) {
+      setCurrentSession(matchedUser);
       showDashboard();
     } else {
+      loginError.textContent = 'Usuário ou senha incorretos. Tente novamente.';
       loginError.style.display = 'block';
       passwordInput.value = '';
       passwordInput.focus();
@@ -115,7 +204,7 @@ function setupAuth() {
   });
 
   btnLogout.addEventListener('click', () => {
-    sessionStorage.removeItem(SESSION_KEY);
+    clearCurrentSession();
     showLogin();
   });
 }
@@ -129,15 +218,245 @@ function showLogin() {
   usernameInput.focus();
 }
 
+function updateUserSessionUI() {
+  const session = getCurrentSession();
+  if (!session) {
+    showLogin();
+    return;
+  }
+
+  if (currentUserBadge && navUsername && navUserRole) {
+    currentUserBadge.style.display = 'inline-flex';
+    navUsername.textContent = session.name || session.username;
+
+    if (session.role === 'adm') {
+      navUserRole.textContent = 'ADM';
+      navUserRole.className = 'role-pill role-pill-adm';
+      navUserRole.title = 'Perfil: Administrador (Controle Total)';
+    } else {
+      navUserRole.textContent = 'CONSULTA';
+      navUserRole.className = 'role-pill role-pill-consulta';
+      navUserRole.title = 'Perfil: Consulta (Apenas Leitura)';
+    }
+  }
+
+  // Apenas Administradores (adm) podem visualizar e acessar a gestão de usuários
+  if (btnManageUsers) {
+    if (session.role === 'adm') {
+      btnManageUsers.style.display = 'inline-flex';
+    } else {
+      btnManageUsers.style.display = 'none';
+    }
+  }
+}
+
 async function showDashboard() {
   loginOverlay.style.display = 'none';
   appContainer.style.display = 'flex';
   
+  updateUserSessionUI();
+
   if (allVehicles.length === 0) {
     await loadData();
     setupDashboardEvents();
     setupCameraEvents();
+    setupUsersManagementEvents();
   }
+}
+
+// User Management Implementation (Apenas ADM)
+function setupUsersManagementEvents() {
+  if (btnManageUsers) {
+    btnManageUsers.addEventListener('click', openUsersModal);
+  }
+
+  if (btnCloseUsersModal) {
+    btnCloseUsersModal.addEventListener('click', closeUsersModal);
+  }
+
+  if (usersModal) {
+    usersModal.addEventListener('click', (e) => {
+      if (e.target === usersModal) closeUsersModal();
+    });
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && usersModal && usersModal.style.display === 'flex') {
+      closeUsersModal();
+    }
+  });
+
+  if (createUserForm) {
+    createUserForm.addEventListener('submit', handleCreateUser);
+  }
+}
+
+function openUsersModal() {
+  const session = getCurrentSession();
+  if (!session || session.role !== 'adm') {
+    alert('Acesso negado: Somente administradores podem gerenciar usuários.');
+    return;
+  }
+
+  if (createUserFeedback) {
+    createUserFeedback.style.display = 'none';
+    createUserFeedback.textContent = '';
+  }
+  if (createUserForm) {
+    createUserForm.reset();
+  }
+
+  renderUsersList();
+  usersModal.style.display = 'flex';
+  if (newUsernameInput) newUsernameInput.focus();
+}
+
+function closeUsersModal() {
+  if (usersModal) usersModal.style.display = 'none';
+}
+
+function renderUsersList() {
+  const users = getUsers();
+  const session = getCurrentSession();
+
+  if (usersTotalCount) {
+    usersTotalCount.textContent = users.length;
+  }
+
+  if (!usersTableBody) return;
+
+  usersTableBody.innerHTML = '';
+
+  users.forEach(u => {
+    const tr = document.createElement('tr');
+
+    const roleBadge = u.role === 'adm' 
+      ? `<span class="role-pill role-pill-adm">ADM</span>` 
+      : `<span class="role-pill role-pill-consulta">Consulta</span>`;
+
+    let actionHtml = '';
+    if (u.username === 'samuel') {
+      actionHtml = `<span style="font-size: 0.725rem; color: var(--text-muted); font-style: italic;">Padrão</span>`;
+    } else if (session && session.username === u.username) {
+      actionHtml = `<span style="font-size: 0.725rem; color: var(--text-muted); font-style: italic;">Você</span>`;
+    } else {
+      actionHtml = `<button type="button" class="btn-delete-user" data-user="${u.username}" title="Excluir usuário">Excluir</button>`;
+    }
+
+    tr.innerHTML = `
+      <td><strong>${u.username}</strong></td>
+      <td>${u.name || '-'}</td>
+      <td>${roleBadge}</td>
+      <td style="color: var(--text-muted); font-size: 0.75rem;">${u.createdAt || '-'}</td>
+      <td style="text-align: right;">${actionHtml}</td>
+    `;
+
+    usersTableBody.appendChild(tr);
+  });
+
+  usersTableBody.querySelectorAll('.btn-delete-user').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const targetUser = e.currentTarget.getAttribute('data-user');
+      deleteUser(targetUser);
+    });
+  });
+}
+
+async function handleCreateUser(e) {
+  e.preventDefault();
+
+  const session = getCurrentSession();
+  if (!session || session.role !== 'adm') {
+    showCreateUserFeedback('Acesso negado: apenas administradores podem criar usuários.', 'error');
+    return;
+  }
+
+  const rawUsername = newUsernameInput.value.trim().toLowerCase();
+  const rawFullName = newFullNameInput.value.trim();
+  const rawPassword = newPasswordInput.value;
+  const roleVal = newRoleSelect.value === 'adm' ? 'adm' : 'consulta';
+
+  if (rawUsername.length < 3) {
+    showCreateUserFeedback('O nome de usuário deve ter pelo menos 3 caracteres.', 'error');
+    newUsernameInput.focus();
+    return;
+  }
+
+  if (!/^[a-z0-9_.-]+$/.test(rawUsername)) {
+    showCreateUserFeedback('O usuário deve conter apenas letras minúsculas, números, ponto ou traço.', 'error');
+    newUsernameInput.focus();
+    return;
+  }
+
+  if (rawPassword.length < 4) {
+    showCreateUserFeedback('A senha deve ter pelo menos 4 caracteres.', 'error');
+    newPasswordInput.focus();
+    return;
+  }
+
+  const users = getUsers();
+  const exists = users.some(u => u.username.toLowerCase() === rawUsername);
+  if (exists) {
+    showCreateUserFeedback(`O usuário "${rawUsername}" já está cadastrado. Escolha outro login.`, 'error');
+    newUsernameInput.focus();
+    return;
+  }
+
+  const passHash = await sha256(rawPassword);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR');
+
+  const newUser = {
+    username: rawUsername,
+    name: rawFullName || rawUsername,
+    role: roleVal,
+    hash: passHash,
+    createdAt: dateStr
+  };
+
+  users.push(newUser);
+  saveUsers(users);
+
+  createUserForm.reset();
+  const roleName = roleVal === 'adm' ? 'Administrador' : 'Consulta';
+  showCreateUserFeedback(`Usuário "${rawUsername}" (${roleName}) criado com sucesso!`, 'success');
+
+  renderUsersList();
+}
+
+function showCreateUserFeedback(msg, type) {
+  if (!createUserFeedback) return;
+  createUserFeedback.textContent = msg;
+  createUserFeedback.className = `form-feedback ${type === 'success' ? 'form-feedback-success' : 'form-feedback-error'}`;
+  createUserFeedback.style.display = 'block';
+}
+
+function deleteUser(usernameToDelete) {
+  const session = getCurrentSession();
+  if (!session || session.role !== 'adm') {
+    alert('Acesso negado: Somente administradores podem excluir usuários.');
+    return;
+  }
+
+  if (usernameToDelete === 'samuel') {
+    alert('O administrador mestre (samuel) não pode ser excluído.');
+    return;
+  }
+
+  if (session.username === usernameToDelete) {
+    alert('Você não pode excluir o usuário que está atualmente logado.');
+    return;
+  }
+
+  const confirmDelete = confirm(`Tem certeza que deseja excluir o usuário "${usernameToDelete}"?`);
+  if (!confirmDelete) return;
+
+  let users = getUsers();
+  users = users.filter(u => u.username !== usernameToDelete);
+  saveUsers(users);
+
+  showCreateUserFeedback(`Usuário "${usernameToDelete}" removido com sucesso.`, 'success');
+  renderUsersList();
 }
 
 async function loadData() {
@@ -391,7 +710,7 @@ function renderVehicleDetails(v) {
   let historyHtml = '';
   if (v.historico && v.historico.length > 0) {
     historyHtml = `
-      <h3 class="section-title">Últimos Abastecimentos Registrados (Ficha)</h3>
+      <h3 class="section-title">Últimos Abastecimentos Registrados</h3>
       <div class="history-container">
         <table class="history-table">
           <thead>
@@ -425,6 +744,7 @@ function renderVehicleDetails(v) {
     historyHtml = `
       <h3 class="section-title">Últimos Abastecimentos Registrados</h3>
       <div style="padding: 1.5rem; text-align: center; background: var(--bg-main); border-radius: var(--radius-md); border: 1px dashed var(--border); color: var(--text-muted);">
+        <strong style="display: block; font-size: 1rem; color: var(--text-main); margin-bottom: 0.35rem;">Nenhum</strong>
         Nenhum registro de abastecimento localizado para este veículo no período analisado.
       </div>
     `;
@@ -498,7 +818,7 @@ function renderVehicleDetails(v) {
       <div class="kpi-card">
         <span class="kpi-title">Total Abastecido</span>
         <span class="kpi-value">${v.total_litros ? v.total_litros.toLocaleString('pt-BR') + ' L' : '0 L'}</span>
-        <span class="kpi-subtext">${v.abastecimentos_count} abastecimento(s)</span>
+        <span class="kpi-subtext">${v.abastecimentos_count > 0 ? `${v.abastecimentos_count} abastecimento(s)` : 'Nenhum'}</span>
       </div>
 
       <div class="kpi-card">
