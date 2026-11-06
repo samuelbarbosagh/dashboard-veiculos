@@ -80,7 +80,7 @@
           </svg>
           <div>
             <h1>Gestão de Frotas & Abastecimento</h1>
-            <span class="subtitle">Consulta Técnica ST9 &bull; Auditoria Consolidada Fichas (_FC_) x App (_PA_)</span>
+            <span class="subtitle">Consulta Técnica ST9 &bull; Auditoria Consolidada Fichas (FC) x App (PA)</span>
           </div>
         </div>
         <div class="header-right">
@@ -182,9 +182,9 @@
             <label for="statusFilter">Status / Origem Abastecimento:</label>
             <select id="statusFilter">
               <option value="">Todos os veículos</option>
-              <option value="paralelo">Em Paralelo: Ficha (_FC_) + Aplicativo (_PA_)</option>
-              <option value="abastecido">Com Abastecimento na Ficha (_FC_)</option>
-              <option value="abastecido_app">Com Abastecimento no Aplicativo (_PA_)</option>
+              <option value="paralelo">Em Paralelo: Ficha (FC) + Aplicativo (PA)</option>
+              <option value="abastecido">Com Abastecimento na Ficha (FC)</option>
+              <option value="abastecido_app">Com Abastecimento no Aplicativo (PA)</option>
               <option value="so_ficha">Apenas na Ficha Manual (Ausente no App)</option>
               <option value="so_app">Apenas no Aplicativo (Sem Ficha Manual)</option>
               <option value="alerta">Com Alerta (Horímetro parado)</option>
@@ -259,7 +259,7 @@
           <h2>DASHBOARD EXECUTIVO - AUDITORIA, SAZONALIDADE E EFICIÊNCIA DE FROTA</h2>
           <p id="execPeriodSubtitle">
             Período Analisado: <strong>01/10/2026 a 04/11/2026</strong> &bull;
-            Comparativo em Paralelo: <strong>Fichas Manuais (_FC_)</strong> vs. <strong>Portal Almoxarifado / App (_PA_)</strong> vs. <strong>SCP</strong>
+            Comparativo em Paralelo: <strong>Fichas Manuais (FC)</strong> vs. <strong>Portal Almoxarifado / App (PA)</strong> vs. <strong>SCP</strong>
           </p>
         </div>
 
@@ -316,8 +316,8 @@
       <!-- Barra de Legenda Oficial de Cores (Padrão Google Sheets DASHBOARD) -->
       <div class="exec-legend-bar">
         <span class="legend-title">Padrão Visual Oficial (Aba DASHBOARD):</span>
-        <span class="legend-item"><i class="dot" style="background:#1a227d;"></i> Ficha Manual (<code>_FC_</code>)</span>
-        <span class="legend-item"><i class="dot" style="background:#e56619;"></i> Aplicativo / Portal Almoxarifado (<code>_PA_</code>)</span>
+        <span class="legend-item"><i class="dot" style="background:#1a227d;"></i> Ficha Manual (<code>FC</code>)</span>
+        <span class="legend-item"><i class="dot" style="background:#e56619;"></i> Aplicativo / Portal Almoxarifado (<code>PA</code>)</span>
         <span class="legend-item"><i class="dot" style="background:#2d8c56;"></i> Controle SCP / Consistência OK</span>
         <span class="legend-item"><i class="dot" style="background:#f2a50c;"></i> Óleo Diesel</span>
         <span class="legend-item"><i class="dot" style="background:#e05133;"></i> Gasolina</span>
@@ -326,12 +326,12 @@
       </div>
 
       <!-- =================================================================
-           BLOCO 1 DE GRÁFICOS: GOVERNANÇA, PARALELO FICHA (_FC_) X APP (_PA_)
+           BLOCO 1 DE GRÁFICOS: GOVERNANÇA, PARALELO FICHA (FC) X APP (PA)
            ================================================================= -->
       <section class="exec-block" data-block="charts-gov">
         <div class="exec-block-header">
           <div>
-            <h3>1. Governança e Conciliação em Paralelo: Fichas Manuais (_FC_) vs. Aplicativo Portal (_PA_)</h3>
+            <h3>1. Governança e Conciliação em Paralelo: Fichas Manuais (FC) vs. Aplicativo Portal (PA)</h3>
             <p>Comparativo direto de volume, quantidade de registros, aderência digital e status de auditoria por filial</p>
           </div>
           <span class="exec-block-tag">Gráficos 1 a 6 &bull; Aba DASHBOARD</span>
@@ -340,7 +340,7 @@
         <div class="exec-charts-grid">
           <div class="exec-chart-card exec-chart-wide">
             <div class="chart-card-header">
-              <h4>Volume Abastecido por Filial: Fichas (_FC_) vs. Portal (_PA_) (Litros)</h4>
+              <h4>Volume Abastecido por Filial: Fichas (FC) vs. Portal (PA) (Litros)</h4>
               <span class="chart-tag">Colunas em Paralelo</span>
             </div>
             <div class="chart-canvas-wrap"><canvas id="chartVolFichaVsPortal"></canvas></div>
@@ -372,7 +372,7 @@
 
           <div class="exec-chart-card">
             <div class="chart-card-header">
-              <h4>Evolução Mensal: Fichas (_FC_) vs. Portal (_PA_)</h4>
+              <h4>Evolução Mensal: Fichas (FC) vs. Portal (PA)</h4>
               <span class="chart-tag">Out/2026 x Nov/2026</span>
             </div>
             <div class="chart-canvas-wrap"><canvas id="chartMensalFichaPortal"></canvas></div>
@@ -380,7 +380,7 @@
 
           <div class="exec-chart-card exec-chart-full">
             <div class="chart-card-header">
-              <h4>Auditoria Comparativa Empilhada Lado a Lado: Fichas (_FC_) vs. Portal (_PA_) por Filial</h4>
+              <h4>Auditoria Comparativa Empilhada Lado a Lado: Fichas (FC) vs. Portal (PA) por Filial</h4>
               <span class="chart-tag">Memória de Cálculo 3b &bull; Consistentes / Inconsistentes / Localizadas / Não Localizadas</span>
             </div>
             <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartAuditoriaEmpilhada"></canvas></div>
@@ -451,7 +451,7 @@
 
           <div class="exec-chart-card exec-chart-wide">
             <div class="chart-card-header">
-              <h4>Evolução Diária - DIESEL: Ficha (_FC_) vs. Portal (_PA_) vs. SCP (Litros)</h4>
+              <h4>Evolução Diária - DIESEL: Ficha (FC) vs. Portal (PA) vs. SCP (Litros)</h4>
               <span class="chart-tag">Auditoria Diária Diesel</span>
             </div>
             <div class="chart-canvas-wrap"><canvas id="chartDiarioDiesel3Fontes"></canvas></div>
@@ -459,7 +459,7 @@
 
           <div class="exec-chart-card exec-chart-wide">
             <div class="chart-card-header">
-              <h4>Evolução Diária - GASOLINA: Ficha (_FC_) vs. Portal (_PA_) vs. SCP (Litros)</h4>
+              <h4>Evolução Diária - GASOLINA: Ficha (FC) vs. Portal (PA) vs. SCP (Litros)</h4>
               <span class="chart-tag">Auditoria Diária Gasolina</span>
             </div>
             <div class="chart-canvas-wrap"><canvas id="chartDiarioGasolina3Fontes"></canvas></div>
@@ -491,7 +491,7 @@
           <div class="exec-chart-card">
             <div class="chart-card-header">
               <h4>Top 10 Placas com Divergência de Volume (Fichas vs. Portal)</h4>
-              <span class="chart-tag">Ficha (_FC_) x App (_PA_) x Diferença</span>
+              <span class="chart-tag">Ficha (FC) x App (PA) x Diferença</span>
             </div>
             <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartTop10DivergenciaPlacas"></canvas></div>
           </div>
@@ -552,7 +552,7 @@
       <section class="exec-block" data-block="charts-frent">
         <div class="exec-block-header">
           <div>
-            <h3>4. Desempenho, Eficiência e Auditoria por Frentista (Fichas _FC_ vs. Portal _PA_)</h3>
+            <h3>4. Desempenho, Eficiência e Auditoria por Frentista (Fichas FC vs. Portal PA)</h3>
             <p>Volume abastecido por frentista nas Fichas Manuais vs. Aplicativo Portal, índice de adesão e divergências</p>
           </div>
           <span class="exec-block-tag">Gráfico 23 & Quadro 20 &bull; Aba INDICADORES</span>
@@ -561,7 +561,7 @@
         <div class="exec-charts-grid">
           <div class="exec-chart-card exec-chart-full">
             <div class="chart-card-header">
-              <h4>Comparativo por Frentista: Litros Fichas (_FC_) vs. Litros Portal (_PA_) e Divergências</h4>
+              <h4>Comparativo por Frentista: Litros Fichas (FC) vs. Litros Portal (PA) e Divergências</h4>
               <span class="chart-tag">11 Frentistas Auditados</span>
             </div>
             <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chartRankingFrentistas"></canvas></div>
@@ -579,7 +579,7 @@
     </main>
 
     <footer class="footer">
-      <p>Dashboard de Consulta de Frotas & Auditoria Consolidada &copy; 2026 &bull; Base integrada: ST9, TT8 Protheus, Fichas Manuais (<code>_FC_</code>), Portal Almoxarifado (<code>_PA_</code>) e Aba <code>INDICADORES</code></p>
+      <p>Dashboard de Consulta de Frotas & Auditoria Consolidada &copy; 2026 &bull; Base integrada: ST9, TT8 Protheus, Fichas Manuais (<code>FC</code>), Portal Almoxarifado (<code>PA</code>) e Aba <code>INDICADORES</code></p>
     </footer>
   </div>
 

@@ -53,7 +53,12 @@ def parse_ptbr_int(val):
 
 def clean_cell(row, idx):
     if idx < len(row) and row[idx] is not None:
-        return str(row[idx]).strip()
+        s = str(row[idx]).strip()
+        s = s.replace("(_FC_)", "(FC)").replace("(_PA_)", "(PA)")
+        s = re.sub(r"_FC_", " FC ", s)
+        s = re.sub(r"_PA_", " PA ", s)
+        s = re.sub(r"\s+", " ", s).strip()
+        return s
     return ""
 
 

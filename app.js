@@ -719,10 +719,10 @@ function renderVehicleList() {
     const isAlerta = (v.pos_contador === '1' || v.pos_contador === 1) && v.status_bem !== 'Não listado em ST9';
     const alertBadge = isAlerta ? `<span class="badge badge-alert">Parado</span>` : '';
     const fichaBadge = v.abastecimentos_count > 0
-      ? `<span class="badge badge-ficha-navy" title="Registros na Ficha Manual (_FC_)">${v.abastecimentos_count} Ficha</span>`
+      ? `<span class="badge badge-ficha-navy" title="Registros na Ficha Manual (FC)">${v.abastecimentos_count} Ficha</span>`
       : '';
     const appBadge = (v.abastecimentos_app_count || 0) > 0
-      ? `<span class="badge badge-app-orange" title="Registros no Aplicativo Portal (_PA_)">${v.abastecimentos_app_count} App</span>`
+      ? `<span class="badge badge-app-orange" title="Registros no Aplicativo Portal (PA)">${v.abastecimentos_app_count} App</span>`
       : '';
 
     const litFicha = v.total_litros ? v.total_litros.toLocaleString('pt-BR') + ' L' : '0 L';
@@ -745,7 +745,7 @@ function renderVehicleList() {
         <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
           <span>Série: <strong>${v.serie || '-'}</strong></span>
         </div>
-        <span title="Ficha (_FC_) vs Aplicativo (_PA_)">
+        <span title="Ficha (FC) vs Aplicativo (PA)">
           <strong style="color:#1a227d;">FC: ${litFicha}</strong> &bull; <strong style="color:#e56619;">PA: ${litApp}</strong>
         </span>
       </div>
@@ -802,7 +802,7 @@ function renderVehicleDetails(v) {
     `;
   }
 
-  // Dados em Paralelo: Ficha Manual (_FC_) vs. Aplicativo Portal (_PA_)
+  // Dados em Paralelo: Ficha Manual (FC) vs. Aplicativo Portal (PA)
   const countFicha = v.abastecimentos_count || 0;
   const litrosFicha = v.total_litros || 0;
   const countApp = v.abastecimentos_app_count || 0;
@@ -849,10 +849,10 @@ function renderVehicleDetails(v) {
             Paralelo: Ficha + App (${histFicha.length + histApp.length})
           </button>
           <button type="button" class="history-src-btn ${activeHistorySource === 'ficha' ? 'active' : ''}" data-src="ficha">
-            Ficha Manual _FC_ (${histFicha.length})
+            Ficha Manual FC (${histFicha.length})
           </button>
           <button type="button" class="history-src-btn ${activeHistorySource === 'app' ? 'active' : ''}" data-src="app">
-            Aplicativo _PA_ (${histApp.length})
+            Aplicativo PA (${histApp.length})
           </button>
         </div>
       </div>
@@ -875,8 +875,8 @@ function renderVehicleDetails(v) {
             ${combinedRecords.map(h => {
               const isApp = h._src === 'APP' || h.origem === 'APP';
               const srcBadge = isApp
-                ? `<span class="badge badge-app-orange">APP (_PA_)</span>`
-                : `<span class="badge badge-ficha-navy">FICHA (_FC_)</span>`;
+                ? `<span class="badge badge-app-orange">APP (PA)</span>`
+                : `<span class="badge badge-ficha-navy">FICHA (FC)</span>`;
 
               const resp = h.motorista || h.operador || '-';
               const frentMod = isApp
@@ -927,10 +927,10 @@ function renderVehicleDetails(v) {
             Paralelo: Ficha + App (${histFicha.length + histApp.length})
           </button>
           <button type="button" class="history-src-btn ${activeHistorySource === 'ficha' ? 'active' : ''}" data-src="ficha">
-            Ficha Manual _FC_ (${histFicha.length})
+            Ficha Manual FC (${histFicha.length})
           </button>
           <button type="button" class="history-src-btn ${activeHistorySource === 'app' ? 'active' : ''}" data-src="app">
-            Aplicativo _PA_ (${histApp.length})
+            Aplicativo PA (${histApp.length})
           </button>
         </div>
       </div>
@@ -1027,7 +1027,7 @@ function renderVehicleDetails(v) {
       </div>
     </div>
 
-    <!-- PAINEL EM PARALELO: INDICADORES DE ABASTECIMENTO DA FICHA (_FC_) E DO APLICATIVO (_PA_) -->
+    <!-- PAINEL EM PARALELO: INDICADORES DE ABASTECIMENTO DA FICHA (FC) E DO APLICATIVO (PA) -->
     <div class="parallel-section-box">
       <div class="parallel-header">
         <h3>
@@ -1036,16 +1036,16 @@ function renderVehicleDetails(v) {
             <line x1="12" y1="20" x2="12" y2="4"></line>
             <line x1="6" y1="20" x2="6" y2="14"></line>
           </svg>
-          Indicadores de Abastecimento em Paralelo: Ficha Manual (_FC_) vs. Aplicativo (_PA_)
+          Indicadores de Abastecimento em Paralelo: Ficha Manual (FC) vs. Aplicativo (PA)
         </h3>
         <span class="badge ${countFicha > 0 && countApp > 0 ? 'badge-audit-green' : 'badge-filial'}">${conciliacaoStatus}</span>
       </div>
 
       <div class="parallel-grid">
-        <!-- Coluna 1: Ficha Manual (_FC_) -->
+        <!-- Coluna 1: Ficha Manual (FC) -->
         <div class="parallel-col parallel-col-ficha">
           <div class="parallel-col-title">
-            <span>1. Ficha Manual (_FC_)</span>
+            <span>1. Ficha Manual (FC)</span>
             <span class="badge badge-ficha-navy">Planilha Física</span>
           </div>
           <div class="parallel-metrics-row">
@@ -1063,10 +1063,10 @@ function renderVehicleDetails(v) {
           </div>
         </div>
 
-        <!-- Coluna 2: Aplicativo / Portal Almoxarifado (_PA_) -->
+        <!-- Coluna 2: Aplicativo / Portal Almoxarifado (PA) -->
         <div class="parallel-col parallel-col-app">
           <div class="parallel-col-title">
-            <span>2. Aplicativo Mobile (_PA_)</span>
+            <span>2. Aplicativo Mobile (PA)</span>
             <span class="badge badge-app-orange">Portal Almox.</span>
           </div>
           <div class="parallel-metrics-row">
@@ -1105,15 +1105,15 @@ function renderVehicleDetails(v) {
             </div>
           </div>
           <div class="parallel-foot-note">
-            Confronto direto entre lançamentos de campo (_FC_) e aplicativo (_PA_)
+            Confronto direto entre lançamentos de campo (FC) e aplicativo (PA)
           </div>
         </div>
       </div>
 
       <div class="parallel-bar-wrap">
         <div class="parallel-bar-labels">
-          <span style="color:#1a227d;">Ficha Manual (_FC_): ${litrosFicha.toLocaleString('pt-BR')} L (${pctFichaBar}%)</span>
-          <span style="color:#e56619;">Aplicativo Portal (_PA_): ${litrosApp.toLocaleString('pt-BR')} L (${pctAppBar}%)</span>
+          <span style="color:#1a227d;">Ficha Manual (FC): ${litrosFicha.toLocaleString('pt-BR')} L (${pctFichaBar}%)</span>
+          <span style="color:#e56619;">Aplicativo Portal (PA): ${litrosApp.toLocaleString('pt-BR')} L (${pctAppBar}%)</span>
         </div>
         <div class="parallel-bar-track">
           <div class="parallel-bar-fill-ficha" style="width:${pctFichaBar}%;"></div>
@@ -1250,8 +1250,8 @@ function formatVehicleSummary(v) {
 • *Ano Modelo:* ${v.ano_modelo || 'N/A'}
 • *Cap. Tanque:* ${v.cap_tanque ? v.cap_tanque + ' L' : 'N/A'}
 • *${v.tipo_contador || 'Contador'}:* ${v.pos_contador || '-'} (em ${v.ult_acomp || 'N/A'})
-• *Abastecimento Ficha (_FC_):* ${v.total_litros ? v.total_litros.toLocaleString('pt-BR') + ' L' : '0 L'} (${v.abastecimentos_count || 0} reg.)
-• *Abastecimento App (_PA_):* ${v.total_litros_app ? v.total_litros_app.toLocaleString('pt-BR') + ' L' : '0 L'} (${v.abastecimentos_app_count || 0} reg.)
+• *Abastecimento Ficha (FC):* ${v.total_litros ? v.total_litros.toLocaleString('pt-BR') + ' L' : '0 L'} (${v.abastecimentos_count || 0} reg.)
+• *Abastecimento App (PA):* ${v.total_litros_app ? v.total_litros_app.toLocaleString('pt-BR') + ' L' : '0 L'} (${v.abastecimentos_app_count || 0} reg.)
 • *Centro de Custo:* ${v.centro_custo || 'N/A'}`;
 }
 
@@ -1378,12 +1378,12 @@ function renderExecutiveKPIs(filialSel) {
       <span class="exec-kpi-sub">Base Total: ${allVehicles.length} cadastrados</span>
     </div>
     <div class="exec-kpi-card">
-      <span class="exec-kpi-label">Volume Fichas (_FC_)</span>
+      <span class="exec-kpi-label">Volume Fichas (FC)</span>
       <span class="exec-kpi-val" style="color:#1a227d;">${volFicha} L</span>
       <span class="exec-kpi-sub">Part. Rede: ${filRow ? filRow.part_fichas_fmt : '100,00%'}</span>
     </div>
     <div class="exec-kpi-card kpi-orange">
-      <span class="exec-kpi-label">Volume App Portal (_PA_)</span>
+      <span class="exec-kpi-label">Volume App Portal (PA)</span>
       <span class="exec-kpi-val" style="color:#e56619;">${volPortal} L</span>
       <span class="exec-kpi-sub">Reg. App: ${audRow ? audRow.registros_portal_app_fmt : '2.518'} lançamentos</span>
     </div>
@@ -1458,20 +1458,20 @@ function renderExecutiveCharts(filialSel) {
     ? indicadoresData.auditoria_status_portal_filial.filter(f => f.cod_filial !== '0106')
     : indicadoresData.auditoria_status_portal_filial.filter(f => f.cod_filial === filialSel);
 
-  // 1. Volume Abastecido por Filial: Fichas (_FC_) vs. Portal (_PA_)
+  // 1. Volume Abastecido por Filial: Fichas (FC) vs. Portal (PA)
   createExecChart('chartVolFichaVsPortal', {
     type: 'bar',
     data: {
       labels: filiaisDesempenho.map(f => f.nome_filial),
       datasets: [
         {
-          label: 'Volume Fichas (_FC_) (Litros)',
+          label: 'Volume Fichas (FC) (Litros)',
           data: filiaisDesempenho.map(f => f.volume_fichas),
           backgroundColor: SHEET_COLORS.navyFicha,
           borderRadius: 4
         },
         {
-          label: 'Volume Portal (_PA_) (Litros)',
+          label: 'Volume Portal (PA) (Litros)',
           data: filiaisDesempenho.map(f => f.volume_portal),
           backgroundColor: SHEET_COLORS.orangePortal,
           borderRadius: 4
@@ -1497,7 +1497,7 @@ function renderExecutiveCharts(filialSel) {
       datasets: [
         {
           type: 'bar',
-          label: 'Volume Fichas (_FC_) (L)',
+          label: 'Volume Fichas (FC) (L)',
           data: filiaisDesempenho.map(f => f.volume_fichas),
           backgroundColor: SHEET_COLORS.navyFicha,
           yAxisID: 'y',
@@ -1543,13 +1543,13 @@ function renderExecutiveCharts(filialSel) {
       labels: filiaisStatusPortal.map(f => `Filial ${f.cod_filial}`),
       datasets: [
         {
-          label: 'Qtd. Fichas (_FC_)',
+          label: 'Qtd. Fichas (FC)',
           data: filiaisStatusPortal.map(f => f.qtd_fichas),
           backgroundColor: SHEET_COLORS.steelFicha,
           borderRadius: 4
         },
         {
-          label: 'Qtd. Portal App (_PA_)',
+          label: 'Qtd. Portal App (PA)',
           data: filiaisStatusPortal.map(f => f.qtd_portal),
           backgroundColor: SHEET_COLORS.orangePortal,
           borderRadius: 4
@@ -1605,7 +1605,7 @@ function renderExecutiveCharts(filialSel) {
     }
   });
 
-  // 5. Evolução Mensal: Fichas (_FC_) vs. Portal (_PA_)
+  // 5. Evolução Mensal: Fichas (FC) vs. Portal (PA)
   const mensalFP = indicadoresData.evolucao_mensal_ficha_portal || [];
   createExecChart('chartMensalFichaPortal', {
     type: 'bar',
@@ -1613,13 +1613,13 @@ function renderExecutiveCharts(filialSel) {
       labels: mensalFP.map(m => m.mes_ano),
       datasets: [
         {
-          label: '1_FC_FICHAS (Litros)',
+          label: '1 FC FICHAS (Litros)',
           data: mensalFP.map(m => m.fichas),
           backgroundColor: SHEET_COLORS.navyFicha,
           borderRadius: 5
         },
         {
-          label: '2_PA_PORTAL (Litros)',
+          label: '2 PA PORTAL (Litros)',
           data: mensalFP.map(m => m.portal),
           backgroundColor: SHEET_COLORS.orangePortal,
           borderRadius: 5
@@ -1636,7 +1636,7 @@ function renderExecutiveCharts(filialSel) {
     }
   });
 
-  // 6. Auditoria Comparativa Empilhada Lado a Lado: Fichas (_FC_) vs. Portal (_PA_)
+  // 6. Auditoria Comparativa Empilhada Lado a Lado: Fichas (FC) vs. Portal (PA)
   const empData = filialSel === 'TODAS'
     ? indicadoresData.auditoria_empilhada
     : indicadoresData.auditoria_empilhada.filter(x => x.filial_tipo.startsWith(filialSel));
@@ -1830,8 +1830,8 @@ function renderExecutiveCharts(filialSel) {
     data: {
       labels: sem3.map(d => d.dia_semana),
       datasets: [
-        { label: 'Ficha (_FC_) - Diesel', data: sem3.map(d => d.ficha_diesel), backgroundColor: SHEET_COLORS.steelFicha },
-        { label: 'Portal (_PA_) - Diesel', data: sem3.map(d => d.portal_diesel), backgroundColor: SHEET_COLORS.orangePortal },
+        { label: 'Ficha (FC) - Diesel', data: sem3.map(d => d.ficha_diesel), backgroundColor: SHEET_COLORS.steelFicha },
+        { label: 'Portal (PA) - Diesel', data: sem3.map(d => d.portal_diesel), backgroundColor: SHEET_COLORS.orangePortal },
         { label: 'SCP - Diesel', data: sem3.map(d => d.scp_diesel), backgroundColor: SHEET_COLORS.greenScp }
       ]
     },
@@ -1847,8 +1847,8 @@ function renderExecutiveCharts(filialSel) {
     data: {
       labels: sem3.map(d => d.dia_semana),
       datasets: [
-        { label: 'Ficha (_FC_) - Gasolina', data: sem3.map(d => d.ficha_gasolina), backgroundColor: SHEET_COLORS.steelFicha },
-        { label: 'Portal (_PA_) - Gasolina', data: sem3.map(d => d.portal_gasolina), backgroundColor: SHEET_COLORS.orangePortal },
+        { label: 'Ficha (FC) - Gasolina', data: sem3.map(d => d.ficha_gasolina), backgroundColor: SHEET_COLORS.steelFicha },
+        { label: 'Portal (PA) - Gasolina', data: sem3.map(d => d.portal_gasolina), backgroundColor: SHEET_COLORS.orangePortal },
         { label: 'SCP - Gasolina', data: sem3.map(d => d.scp_gasolina), backgroundColor: SHEET_COLORS.greenScp }
       ]
     },
@@ -1866,8 +1866,8 @@ function renderExecutiveCharts(filialSel) {
     data: {
       labels: dia3.map(d => d.data),
       datasets: [
-        { label: 'Ficha (_FC_) - Diesel', data: dia3.map(d => d.ficha_diesel), borderColor: SHEET_COLORS.steelFicha, borderWidth: 2.2, tension: 0.25 },
-        { label: 'Portal (_PA_) - Diesel', data: dia3.map(d => d.portal_diesel), borderColor: SHEET_COLORS.orangePortal, borderWidth: 2.2, tension: 0.25 },
+        { label: 'Ficha (FC) - Diesel', data: dia3.map(d => d.ficha_diesel), borderColor: SHEET_COLORS.steelFicha, borderWidth: 2.2, tension: 0.25 },
+        { label: 'Portal (PA) - Diesel', data: dia3.map(d => d.portal_diesel), borderColor: SHEET_COLORS.orangePortal, borderWidth: 2.2, tension: 0.25 },
         { label: 'SCP - Diesel', data: dia3.map(d => d.scp_diesel), borderColor: SHEET_COLORS.greenScp, borderWidth: 2.2, tension: 0.25 }
       ]
     },
@@ -1883,8 +1883,8 @@ function renderExecutiveCharts(filialSel) {
     data: {
       labels: dia3.map(d => d.data),
       datasets: [
-        { label: 'Ficha (_FC_) - Gasolina', data: dia3.map(d => d.ficha_gasolina), borderColor: SHEET_COLORS.steelFicha, borderWidth: 2.2, tension: 0.25 },
-        { label: 'Portal (_PA_) - Gasolina', data: dia3.map(d => d.portal_gasolina), borderColor: SHEET_COLORS.orangePortal, borderWidth: 2.2, tension: 0.25 },
+        { label: 'Ficha (FC) - Gasolina', data: dia3.map(d => d.ficha_gasolina), borderColor: SHEET_COLORS.steelFicha, borderWidth: 2.2, tension: 0.25 },
+        { label: 'Portal (PA) - Gasolina', data: dia3.map(d => d.portal_gasolina), borderColor: SHEET_COLORS.orangePortal, borderWidth: 2.2, tension: 0.25 },
         { label: 'SCP - Gasolina', data: dia3.map(d => d.scp_gasolina), borderColor: SHEET_COLORS.greenScp, borderWidth: 2.2, tension: 0.25 }
       ]
     },
@@ -1931,8 +1931,8 @@ function renderExecutiveCharts(filialSel) {
     data: {
       labels: top10DivPlacas.map(p => p.placa),
       datasets: [
-        { label: 'Litros Fichas (_FC_)', data: top10DivPlacas.map(p => p.litros_fichas), backgroundColor: SHEET_COLORS.steelFicha },
-        { label: 'Litros Portal (_PA_)', data: top10DivPlacas.map(p => p.litros_portal), backgroundColor: SHEET_COLORS.orangePortal },
+        { label: 'Litros Fichas (FC)', data: top10DivPlacas.map(p => p.litros_fichas), backgroundColor: SHEET_COLORS.steelFicha },
+        { label: 'Litros Portal (PA)', data: top10DivPlacas.map(p => p.litros_portal), backgroundColor: SHEET_COLORS.orangePortal },
         { label: 'Diferença (L)', data: top10DivPlacas.map(p => p.diferenca), backgroundColor: SHEET_COLORS.darkRed }
       ]
     },
@@ -2055,7 +2055,7 @@ function renderExecutiveCharts(filialSel) {
     options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, grid: { color: gridColor } }, y: { grid: { color: gridColor } } } }
   });
 
-  // 23. Ranking de Frentistas: Litros Fichas (_FC_) vs. Litros Portal (_PA_) e Divergências
+  // 23. Ranking de Frentistas: Litros Fichas (FC) vs. Litros Portal (PA) e Divergências
   const frentList = filialSel === 'TODAS'
     ? indicadoresData.ranking_frentistas
     : indicadoresData.ranking_frentistas.filter(f => f.filial === filialSel || f.frentista.startsWith(filialSel));
@@ -2067,7 +2067,7 @@ function renderExecutiveCharts(filialSel) {
       datasets: [
         {
           type: 'bar',
-          label: 'Litros Fichas (_FC_)',
+          label: 'Litros Fichas (FC)',
           data: frentList.map(f => f.litros_fichas),
           backgroundColor: SHEET_COLORS.steelFicha,
           yAxisID: 'y',
@@ -2075,7 +2075,7 @@ function renderExecutiveCharts(filialSel) {
         },
         {
           type: 'bar',
-          label: 'Litros Portal (_PA_)',
+          label: 'Litros Portal (PA)',
           data: frentList.map(f => f.litros_portal),
           backgroundColor: SHEET_COLORS.orangePortal,
           yAxisID: 'y',
@@ -2147,7 +2147,7 @@ function renderExecutiveAuditableTables(filialSel) {
       <!-- QUADRO 1: DESEMPENHO GERAL E GOVERNANÇA POR FILIAL (PARALELO FICHA X PORTAL) -->
       <div class="audit-table-card">
         <div class="audit-table-titlebar">
-          <h4>1. DESEMPENHO GERAL E GOVERNANÇA POR FILIAL (EM PARALELO: FICHAS _FC_ vs. PORTAL _PA_)</h4>
+          <h4>1. DESEMPENHO GERAL E GOVERNANÇA POR FILIAL (EM PARALELO: FICHAS FC vs. PORTAL PA)</h4>
           <span>Visão Consolidada Rede</span>
         </div>
         <div class="audit-table-scroll">
@@ -2158,9 +2158,9 @@ function renderExecutiveAuditableTables(filialSel) {
                 <th>Nome Filial / Aba</th>
                 <th>Abastecimentos</th>
                 <th>Veículos Distintos</th>
-                <th>Volume Fichas (_FC_) (L)</th>
+                <th>Volume Fichas (FC) (L)</th>
                 <th>% Part. Fichas</th>
-                <th>Volume Portal (_PA_) (L)</th>
+                <th>Volume Portal (PA) (L)</th>
                 <th>% Part. Portal</th>
                 <th>Total KM Percorrido</th>
                 <th>Total Horas Trab.</th>
@@ -2227,7 +2227,7 @@ function renderExecutiveAuditableTables(filialSel) {
       <!-- QUADRO 3 & 10: AUDITORIA DE CONCILIAÇÃO E DIVERGÊNCIAS (FICHAS X PORTAL ALMOXARIFADO X S.A.) -->
       <div class="audit-table-card">
         <div class="audit-table-titlebar">
-          <h4>3. AUDITORIA DE CONCILIAÇÃO E DIVERGÊNCIAS (FICHAS _FC_ X PORTAL ALMOXARIFADO _PA_ X S.A.)</h4>
+          <h4>3. AUDITORIA DE CONCILIAÇÃO E DIVERGÊNCIAS (FICHAS FC X PORTAL ALMOXARIFADO PA X S.A.)</h4>
           <span>Rastreabilidade de Lançamentos</span>
         </div>
         <div class="audit-table-scroll">
@@ -2393,7 +2393,7 @@ function renderExecutiveAuditableTables(filialSel) {
         <!-- Quadro 11 -->
         <div class="audit-table-card">
           <div class="audit-table-titlebar">
-            <h4>11. TOP 10 PLACAS COM DIVERGÊNCIA (FICHAS _FC_ VS. PORTAL _PA_)</h4>
+            <h4>11. TOP 10 PLACAS COM DIVERGÊNCIA (FICHAS FC VS. PORTAL PA)</h4>
             <span>Confronto Direto por Placa</span>
           </div>
           <div class="audit-table-scroll">
@@ -2401,8 +2401,8 @@ function renderExecutiveAuditableTables(filialSel) {
               <thead>
                 <tr>
                   <th>Placa</th>
-                  <th>Litros Fichas (_FC_)</th>
-                  <th>Litros Portal (_PA_)</th>
+                  <th>Litros Fichas (FC)</th>
+                  <th>Litros Portal (PA)</th>
                   <th>Diferença (Ficha - Portal)</th>
                 </tr>
               </thead>
@@ -2466,8 +2466,8 @@ function renderExecutiveAuditableTables(filialSel) {
                   <th>Cód. Filial</th>
                   <th>Qtd. Fichas</th>
                   <th>Qtd. Portal</th>
-                  <th>Litros Fichas (_FC_)</th>
-                  <th>Litros Portal (_PA_)</th>
+                  <th>Litros Fichas (FC)</th>
+                  <th>Litros Portal (PA)</th>
                   <th>Diferença (L)</th>
                   <th>Status Conciliação</th>
                 </tr>
@@ -2597,7 +2597,7 @@ function renderExecutiveAuditableTables(filialSel) {
 
         <div class="audit-table-card">
           <div class="audit-table-titlebar">
-            <h4>15. COMPARATIVO SEMANAL: FICHAS (_FC_) vs. PORTAL (_PA_) vs. SCP</h4>
+            <h4>15. COMPARATIVO SEMANAL: FICHAS (FC) vs. PORTAL (PA) vs. SCP</h4>
             <span>Confronto das 3 Fontes por Dia da Semana</span>
           </div>
           <div class="audit-table-scroll">
@@ -2706,10 +2706,10 @@ function renderExecutiveAuditableTables(filialSel) {
                 <th>Filial</th>
                 <th>Qtde Abast. Total</th>
                 <th>Total Litros (L)</th>
-                <th>Abast. Fichas (_FC_)</th>
-                <th>Abast. Portal (_PA_)</th>
-                <th>Litros Fichas (_FC_)</th>
-                <th>Litros Portal (_PA_)</th>
+                <th>Abast. Fichas (FC)</th>
+                <th>Abast. Portal (PA)</th>
+                <th>Litros Fichas (FC)</th>
+                <th>Litros Portal (PA)</th>
                 <th>Divergências Portal</th>
                 <th>Index Adesão App</th>
                 <th>Index Adesão Ficha</th>
@@ -2769,7 +2769,7 @@ function exportAuditTablesToCsv() {
   if (!indicadoresData) return;
 
   const lines = [];
-  lines.push('RELATORIO CONSOLIDADO E AUDITAVEL DE ABASTECIMENTO - FICHAS (_FC_) X APLICATIVO PORTAL (_PA_)');
+  lines.push('RELATORIO CONSOLIDADO E AUDITAVEL DE ABASTECIMENTO - FICHAS (FC) X APLICATIVO PORTAL (PA)');
   lines.push(`Periodo;${indicadoresData.meta.data_inicial} a ${indicadoresData.meta.data_final}`);
   lines.push('');
   lines.push('1. DESEMPENHO GERAL E GOVERNANCA POR FILIAL');
