@@ -3,14 +3,23 @@ const USERS_STORAGE_KEY = 'frota_users_db';
 const SESSION_KEY = 'frota_dashboard_session';
 const THEME_KEY = 'frota_theme_pref';
 
-// Administrador padrão inicial do sistema (se a base local estiver vazia)
-const DEFAULT_ADMIN = {
-  username: 'samuel',
-  name: 'Samuel Barbosa',
-  role: 'adm', // 'adm' (administrador) ou 'consulta' (apenas visualização)
-  hash: 'a2e363fb1596b372d664fa81bf5fbbeb1aaab6e358df85c7973cc5ffbbe82248', // sha256('consulta')
-  createdAt: '06/11/2026'
-};
+// Usuários padrão iniciais do sistema
+const DEFAULT_USERS = [
+  {
+    username: 'samuel',
+    name: 'Samuel Barbosa',
+    role: 'adm', // 'adm' (administrador - controle total)
+    hash: 'a2e363fb1596b372d664fa81bf5fbbeb1aaab6e358df85c7973cc5ffbbe82248', // sha256('consulta')
+    createdAt: '06/11/2026'
+  },
+  {
+    username: 'davi',
+    name: 'Davi',
+    role: 'consulta', // 'consulta' (perfil de consulta e visualização)
+    hash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', // sha256('123456')
+    createdAt: '06/11/2026'
+  }
+];
 
 // State
 let allVehicles = [];
@@ -118,26 +127,30 @@ function getUsers() {
   try {
     const raw = localStorage.getItem(USERS_STORAGE_KEY);
     if (!raw) {
-      const initialList = [DEFAULT_ADMIN];
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initialList));
-      return initialList;
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
+      return [...DEFAULT_USERS];
     }
     const list = JSON.parse(raw);
     if (!Array.isArray(list) || list.length === 0) {
-      const initialList = [DEFAULT_ADMIN];
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initialList));
-      return initialList;
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
+      return [...DEFAULT_USERS];
     }
-    // Garante que o administrador mestre sempre existe
-    const hasSamuel = list.some(u => u.username === 'samuel');
-    if (!hasSamuel) {
-      list.unshift(DEFAULT_ADMIN);
+    // Garante que os usuários padrão essenciais existem
+    let updated = false;
+    DEFAULT_USERS.forEach(defUser => {
+      const idx = list.findIndex(u => u.username.toLowerCase() === defUser.username.toLowerCase());
+      if (idx === -1) {
+        list.push(defUser);
+        updated = true;
+      }
+    });
+    if (updated) {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(list));
     }
     return list;
   } catch (e) {
     console.error('Erro ao ler base de usuários:', e);
-    return [DEFAULT_ADMIN];
+    return [...DEFAULT_USERS];
   }
 }
 
