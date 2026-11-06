@@ -1,5 +1,5 @@
 // Service Worker para PWA do Dashboard de Frotas
-const CACHE_NAME = 'frotas-v5';
+const CACHE_NAME = 'frotas-v6';
 const STATIC_ASSETS = [
   './',
   './index.html',

@@ -23,15 +23,15 @@ const DEFAULT_USERS = [
   {
     username: 'samuel',
     name: 'Samuel Barbosa',
-    role: 'adm', // 'adm' (administrador - controle total)
-    hash: 'a2e363fb1596b372d664fa81bf5fbbeb1aaab6e358df85c7973cc5ffbbe82248', // sha256('consulta')
+    role: 'adm', // administrador
+    hash: 'a2e363fb1596b372d664fa81bf5fbbeb1aaab6e358df85c7973cc5ffbbe82248',
     createdAt: '06/11/2026'
   },
   {
     username: 'davi',
     name: 'Davi',
-    role: 'consulta', // 'consulta' (perfil de consulta e visualização)
-    hash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', // sha256('123456')
+    role: 'consulta', // consulta
+    hash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
     createdAt: '06/11/2026'
   }
 ];
