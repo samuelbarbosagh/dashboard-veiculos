@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Consulta de Veículos & Frotas</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Modal / Overlay de Login -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+      <div class="login-header">
+        <svg class="login-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <h2>Acesso ao Dashboard</h2>
+        <p>Informe seu usuário e senha para consultar a frota</p>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="username">Usuário</label>
+          <input type="text" id="username" placeholder="Ex: admin" required autocomplete="username" autofocus>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <input type="password" id="password" placeholder="Digite sua senha" required autocomplete="current-password">
+        </div>
+
+        <div id="loginError" class="login-error" style="display: none;">
+          Usuário ou senha incorretos. Tente novamente.
+        </div>
+
+        <button type="submit" class="btn-login" id="btnLogin">
+          <span>Entrar no Sistema</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+
+        <div class="login-hint">
+          <span>Acesso: <code>samuel</code></span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard Principal (Oculto até efetuar login) -->
+  <div id="appContainer" style="display: none; flex-direction: column; min-height: 100vh;">
+    <header class="navbar">
+      <div class="nav-container">
+        <div class="brand">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13"></rect>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+            <circle cx="18.5" cy="18.5" r="2.5"></circle>
+          </svg>
+          <div>
+            <h1>Consulta de Veículos & Frotas</h1>
+            <span class="subtitle">Gestão Integrada de Combustível e Equipamentos</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="stats-badge" id="statsBadge">
+            <span class="dot"></span> Carregando frota...
+          </div>
+          <button id="btnLogout" class="btn-logout" title="Encerrar sessão">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Sair</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-container">
+      <!-- Controls section -->
+      <section class="controls-card">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Buscar por placa, prefixo, chassi, número de série, bem ou modelo...">
+          <button id="clearSearch" class="btn-clear" title="Limpar busca">&times;</button>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-group">
+            <label for="filialFilter">Filial:</label>
+            <select id="filialFilter">
+              <option value="">Todas as filiais</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="familiaFilter">Família / Categoria:</label>
+            <select id="familiaFilter">
+              <option value="">Todas as famílias</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="statusFilter">Status do Contador:</label>
+            <select id="statusFilter">
+              <option value="">Todos</option>
+              <option value="alerta">Com Alerta (Horímetro parado)</option>
+              <option value="abastecido">Com Abastecimento Registrado</option>
+              <option value="chassi">Com Chassi Cadastrado</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Content layout: List & Detail View -->
+      <div class="dashboard-grid">
+        <!-- Vehicles listing sidebar -->
+        <aside class="sidebar-list">
+          <div class="list-header">
+            <span id="resultsCount">0 veículos encontrados</span>
+          </div>
+          <div class="vehicle-items" id="vehicleList">
+            <!-- Item cards populated via JS -->
+          </div>
+        </aside>
+
+        <!-- Vehicle details panel -->
+        <section class="detail-panel" id="detailPanel">
+          <div class="empty-state" id="emptyState">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <h3>Selecione um veículo para visualizar os detalhes</h3>
+            <p>Utilize a barra de pesquisa por placa, chassi, série ou clique em um veículo da lista.</p>
+          </div>
+
+          <div class="vehicle-details" id="vehicleDetails" style="display: none;">
+            <!-- Detail content populated by JS -->
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>Dashboard de Consulta de Frotas &copy; 2026 &bull; Sincronização automática com Google Sheets via GitHub Actions</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
