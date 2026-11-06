@@ -209,6 +209,33 @@ function setupDashboardEvents() {
   filialFilter.addEventListener('change', applyFilters);
   familiaFilter.addEventListener('change', applyFilters);
   statusFilter.addEventListener('change', applyFilters);
+
+  setupMobileNavEvents();
+}
+
+function setMobileView(view) {
+  const grid = document.getElementById('dashboardGrid');
+  const tabList = document.getElementById('tabBtnList');
+  const tabDetail = document.getElementById('tabBtnDetail');
+  if (!grid || !tabList || !tabDetail) return;
+
+  grid.setAttribute('data-mobile-view', view);
+  if (view === 'detail') {
+    tabList.classList.remove('active');
+    tabDetail.classList.add('active');
+    window.scrollTo({ top: grid.offsetTop - 12, behavior: 'smooth' });
+  } else {
+    tabDetail.classList.remove('active');
+    tabList.classList.add('active');
+    window.scrollTo({ top: grid.offsetTop - 12, behavior: 'smooth' });
+  }
+}
+
+function setupMobileNavEvents() {
+  const tabList = document.getElementById('tabBtnList');
+  const tabDetail = document.getElementById('tabBtnDetail');
+  if (tabList) tabList.addEventListener('click', () => setMobileView('list'));
+  if (tabDetail) tabDetail.addEventListener('click', () => setMobileView('detail'));
 }
 
 function applyFilters() {
@@ -255,6 +282,11 @@ function renderVehicleList() {
   vehicleList.innerHTML = '';
   resultsCount.textContent = `${filteredVehicles.length} veículo${filteredVehicles.length === 1 ? '' : 's'} encontrado${filteredVehicles.length === 1 ? '' : 's'}`;
 
+  const mobileCountBadge = document.getElementById('mobileCountBadge');
+  if (mobileCountBadge) {
+    mobileCountBadge.textContent = filteredVehicles.length;
+  }
+
   if (filteredVehicles.length === 0) {
     vehicleList.innerHTML = `
       <div style="padding: 2rem 1rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
@@ -300,22 +332,36 @@ function renderVehicleList() {
       </div>
     `;
 
-    card.addEventListener('click', () => selectVehicle(v, card));
+    card.addEventListener('click', () => selectVehicle(v, card, true));
     vehicleList.appendChild(card);
   });
 
-  if (!selectedVehicle && toRender.length > 0) {
-    selectVehicle(toRender[0], vehicleList.firstChild);
+  const isSelectedInFiltered = selectedVehicle && filteredVehicles.some(v => v.bem === selectedVehicle.bem);
+  if (!isSelectedInFiltered && toRender.length > 0) {
+    selectVehicle(toRender[0], vehicleList.firstChild, false);
+  } else if (filteredVehicles.length === 0) {
+    selectedVehicle = null;
+    vehicleDetails.style.display = 'none';
+    emptyState.style.display = 'block';
   }
 }
 
-function selectVehicle(v, cardEl) {
+function selectVehicle(v, cardEl, isUserTap = false) {
   selectedVehicle = v;
 
   document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('active'));
   if (cardEl) cardEl.classList.add('active');
 
+  const mobileDetailTabLabel = document.getElementById('mobileDetailTabLabel');
+  if (mobileDetailTabLabel) {
+    mobileDetailTabLabel.textContent = `Ficha: ${v.placa || v.bem}`;
+  }
+
   renderVehicleDetails(v);
+
+  if (isUserTap && window.innerWidth <= 768) {
+    setMobileView('detail');
+  }
 }
 
 function renderVehicleDetails(v) {
@@ -385,6 +431,15 @@ function renderVehicleDetails(v) {
   }
 
   vehicleDetails.innerHTML = `
+    <div class="mobile-back-bar">
+      <button type="button" class="btn-back-to-list" id="btnBackToList">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>&larr; Voltar para a Lista de Veículos</span>
+      </button>
+    </div>
     <div class="detail-header">
       <div class="detail-title">
         <h2>
@@ -553,6 +608,11 @@ function renderVehicleDetails(v) {
   document.getElementById('btnShareWhatsApp').addEventListener('click', () => shareViaWhatsApp(v));
   document.getElementById('btnCopyVehicle').addEventListener('click', () => copyVehicleDetails(v));
   document.getElementById('btnPrintVehicle').addEventListener('click', () => window.print());
+
+  const btnBackToList = document.getElementById('btnBackToList');
+  if (btnBackToList) {
+    btnBackToList.addEventListener('click', () => setMobileView('list'));
+  }
 }
 
 // Quick Actions Implementation
