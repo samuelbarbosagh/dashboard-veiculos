@@ -1,13 +1,26 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="auto">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Dashboard de Consulta de Veículos & Frotas</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tesseract.js para OCR de placa no navegador -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -26,7 +39,7 @@
       <form id="loginForm" class="login-form">
         <div class="form-group">
           <label for="username">Usuário</label>
-          <input type="text" id="username" placeholder="Ex: admin" required autocomplete="username" autofocus>
+          <input type="text" id="username" placeholder="Ex: samuel" required autocomplete="username" autofocus>
         </div>
 
         <div class="form-group">
@@ -53,7 +66,7 @@
     </div>
   </div>
 
-  <!-- Dashboard Principal (Oculto até efetuar login) -->
+  <!-- Dashboard Principal -->
   <div id="appContainer" style="display: none; flex-direction: column; min-height: 100vh;">
     <header class="navbar">
       <div class="nav-container">
@@ -65,13 +78,15 @@
             <circle cx="18.5" cy="18.5" r="2.5"></circle>
           </svg>
           <div>
-            <h1>Consulta de Veículos & Frotas</h1>
-            <span class="subtitle">Gestão Integrada de Combustível e Equipamentos</span>
+            <h1>Consulta de Frotas</h1>
+            <span class="subtitle">Gestão Integrada de Veículos</span>
           </div>
         </div>
         <div class="header-right">
-          <div class="stats-badge" id="statsBadge">
-            <span class="dot"></span> Carregando frota...
+          <div class="theme-selector" title="Alternar tema">
+            <button id="btnThemeAuto" class="btn-theme active" title="Tema Automático">Auto</button>
+            <button id="btnThemeLight" class="btn-theme" title="Modo Claro">☀️</button>
+            <button id="btnThemeDark" class="btn-theme" title="Modo Escuro">🌙</button>
           </div>
           <button id="btnLogout" class="btn-logout" title="Encerrar sessão">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -86,15 +101,22 @@
     </header>
 
     <main class="main-container">
-      <!-- Controls section -->
+      <!-- Search & Controls Section -->
       <section class="controls-card">
         <div class="search-box">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="searchInput" placeholder="Buscar por placa, prefixo, chassi, número de série, bem ou modelo...">
+          <input type="text" id="searchInput" placeholder="Buscar placa, chassi, série, modelo...">
           <button id="clearSearch" class="btn-clear" title="Limpar busca">&times;</button>
+          <button id="btnOpenScan" class="btn-camera" title="Escanear placa pela câmera">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span class="btn-cam-label">Escanear</span>
+          </button>
         </div>
 
         <div class="filter-row">
@@ -113,7 +135,7 @@
           </div>
 
           <div class="filter-group">
-            <label for="statusFilter">Status do Contador:</label>
+            <label for="statusFilter">Status:</label>
             <select id="statusFilter">
               <option value="">Todos</option>
               <option value="alerta">Com Alerta (Horímetro parado)</option>
@@ -145,7 +167,7 @@
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
             <h3>Selecione um veículo para visualizar os detalhes</h3>
-            <p>Utilize a barra de pesquisa por placa, chassi, série ou clique em um veículo da lista.</p>
+            <p>Utilize a barra de pesquisa, o scanner de placa ou clique em um veículo da lista.</p>
           </div>
 
           <div class="vehicle-details" id="vehicleDetails" style="display: none;">
@@ -160,6 +182,53 @@
     </footer>
   </div>
 
+  <!-- Modal do Scanner de Placa via Câmera (OCR) -->
+  <div id="cameraModal" class="camera-modal" style="display: none;">
+    <div class="camera-dialog">
+      <div class="camera-header">
+        <h3>Escanear Placa do Veículo</h3>
+        <button id="btnCloseCamera" class="btn-close-modal">&times;</button>
+      </div>
+
+      <div class="camera-body">
+        <div class="video-container" id="videoBox">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+          <!-- Moldura indicadora de placa -->
+          <div class="plate-guide">
+            <div class="guide-header">BRASIL</div>
+            <div class="guide-target"></div>
+            <div class="guide-footer">MERC ENQUADRE A PLACA AQUI</div>
+          </div>
+          <canvas id="captureCanvas" style="display: none;"></canvas>
+        </div>
+
+        <div id="scanStatus" class="scan-status">
+          Posicione a placa dentro da moldura ou tire uma foto.
+        </div>
+      </div>
+
+      <div class="camera-footer">
+        <button id="btnCaptureOCR" class="btn-action-camera">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          Reconhecer Vídeo
+        </button>
+
+        <button type="button" id="btnTriggerPhoto" class="btn-action-camera" style="background-color: var(--primary-light); cursor: pointer; color: white;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          Tirar Foto (Celular)
+        </button>
+        <input type="file" id="cameraFileInput" accept="image/*" capture="environment" style="display: none;">
+      </div>
+    </div>
+  </div>
+
+  
   <script src="app.js"></script>
 </body>
 </html>

@@ -599,23 +599,29 @@ function setupCameraEvents() {
   if (cameraFileInput) {
     cameraFileInput.addEventListener('change', handleFileInputPhoto);
   }
+
+  const btnTriggerPhoto = document.getElementById('btnTriggerPhoto');
+  if (btnTriggerPhoto) {
+    btnTriggerPhoto.addEventListener('click', () => {
+      if (cameraFileInput) cameraFileInput.click();
+    });
+  }
 }
 
 async function startCamera() {
   cameraModal.style.display = 'flex';
-  scanStatus.innerHTML = `<span class="scan-spinner"></span> Iniciando câmera...`;
+  scanStatus.innerHTML = `<span class="scan-spinner"></span> Conectando à câmera...`;
   btnCaptureOCR.style.display = 'inline-flex';
 
   try {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error('Navegador sem suporte a getUserMedia');
+      throw new Error('Navegador sem suporte direto a streaming de vídeo');
     }
 
-    // Tenta primeiro a câmera traseira; se falhar, tenta genérica
     let stream = null;
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } }
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
       });
     } catch (e1) {
       stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -623,16 +629,28 @@ async function startCamera() {
 
     videoStream = stream;
     cameraVideo.srcObject = videoStream;
-    scanStatus.innerHTML = `Enquadre a placa dentro da moldura e toque em Reconhecer`;
+    scanStatus.innerHTML = `Enquadre a placa dentro da moldura e toque em <strong>Reconhecer Vídeo</strong> ou <strong>Tirar Foto</strong>`;
   } catch (err) {
     console.warn('Erro ao abrir streaming de vídeo:', err);
+    btnCaptureOCR.style.display = 'none';
     scanStatus.innerHTML = `
-      <div style="color:var(--text-main); font-size: 0.85rem;">
-        O acesso ao vídeo direto está bloqueado nas permissões do navegador.<br>
-        <strong>Toque em "Tirar Foto" abaixo</strong> para usar a câmera nativa do celular.
+      <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid var(--danger); border-radius: 8px; padding: 0.85rem; text-align: left; margin: 0.5rem 0;">
+        <div style="color: var(--danger); font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          Streaming de Vídeo não autorizado no navegador
+        </div>
+        <p style="font-size: 0.82rem; margin: 0 0 0.65rem 0; color: var(--text-main); line-height: 1.4;">
+          O navegador impediu o acesso ao vídeo ao vivo (comum em prévias ou se a permissão foi negada anteriormente).
+        </p>
+        <button type="button" onclick="document.getElementById('cameraFileInput').click()" style="width: 100%; background: #2563eb; color: #ffffff; border: none; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 2px 4px rgba(37,99,235,0.3);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          Tirar Foto com a Câmera Nativa (Sem Erro)
+        </button>
+        <div style="margin-top: 0.65rem; font-size: 0.725rem; color: var(--text-muted); line-height: 1.3;">
+          💡 <em>Para habilitar o vídeo: toque no ícone 🔒 na barra de endereços do navegador &gt; Permissões &gt; Câmera &gt; Permitir.</em>
+        </div>
       </div>
     `;
-    btnCaptureOCR.style.display = 'none';
   }
 }
 
